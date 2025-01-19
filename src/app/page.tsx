@@ -1,95 +1,86 @@
-import Image from "next/image";
-import styles from "./page.module.css";
+'use client'
+import { useEffect, useState } from 'react'
+import { POKE_API_URL, POKE_LIST } from '@/constants'
+import { IPokemon } from '../types'
+import styles from './page.module.css'
 
 export default function Home() {
+  const [currentPokemon, setCurrentPokemon] = useState<IPokemon | undefined>()
+  const [currentSelectedPokemonIndex, setCurrentSelectedPokemonIndex] =
+    useState(0)
+
+  const getSelectedPokemon = async () => {
+    try {
+      const response = await fetch(
+        `${POKE_API_URL}pokemon/${POKE_LIST[currentSelectedPokemonIndex]}`,
+      )
+      const pokemon = await response.json()
+      setCurrentPokemon(pokemon)
+    } catch (error) {
+      console.error(error)
+    }
+  }
+
+  const onLeftClick = () => {
+    const prevIndex = currentSelectedPokemonIndex - 1
+    if (prevIndex >= 0) {
+      setCurrentSelectedPokemonIndex(prevIndex)
+    }
+  }
+
+  const onRightClick = () => {
+    const nextIndex = currentSelectedPokemonIndex + 1
+    if (nextIndex <= POKE_LIST.length - 1) {
+      setCurrentSelectedPokemonIndex(nextIndex)
+    }
+  }
+
+  useEffect(() => {
+    getSelectedPokemon()
+  }, [currentSelectedPokemonIndex])
+
   return (
     <div className={styles.page}>
       <main className={styles.main}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol>
-          <li>
-            Get started by editing <code>src/app/page.tsx</code>.
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+        <div className={styles.pokeDex}>
+          <div className={styles.pokeScreen}>
+            <div className={styles.pokeImage}>
+              {currentPokemon ? (
+                <img
+                  src={currentPokemon.sprites.front_default}
+                  alt={currentPokemon.name}
+                />
+              ) : (
+                <div>No pokemon</div>
+              )}
+            </div>
+            <div className={styles.pokeData}>
+              {currentPokemon && (
+                <>
+                  <h1>{currentPokemon.name}</h1>
 
-        <div className={styles.ctas}>
-          <a
-            className={styles.primary}
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className={styles.logo}
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-            className={styles.secondary}
-          >
-            Read our docs
-          </a>
+                  {currentPokemon?.abilities && (
+                    <div>
+                      <h2>Habilidades:</h2>
+                      <ul>
+                        {currentPokemon.abilities.map((currentAbility) => (
+                          <li key={currentAbility.ability.name}>
+                            {currentAbility.ability.name}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+          </div>
+          <div className={styles.pokeButtons}>
+            <button onClick={onLeftClick}>Previous</button>
+            <button onClick={onRightClick}>Next</button>
+          </div>
         </div>
       </main>
-      <footer className={styles.footer}>
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
     </div>
-  );
+  )
 }
