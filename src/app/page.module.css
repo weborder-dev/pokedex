@@ -19,6 +19,14 @@
   flex-direction: column;
 }
 
+.loadingScreen {
+  min-height: '222px';
+  background: 'white';
+  display: 'flex';
+  justify-content: 'center';
+  align-items: 'center';
+}
+
 .pokeScreen {
   background-color: white;
   display: flex;
